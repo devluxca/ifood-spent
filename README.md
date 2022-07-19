@@ -1,6 +1,6 @@
 # ifood-spent
 
-ifood-spent is a script that show your spent in ifood throught of CLI
+ifood-spent is a script that show in your terminal how much spent in ifood
 
 ## Installation
 
