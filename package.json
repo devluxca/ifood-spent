@@ -1,0 +1,14 @@
+{
+  "name": "ifood-orders",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": "./index.js",
+  "engines": {
+    "node": ">=14.16"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "ramda": "^0.28.0"
+  }
+}
