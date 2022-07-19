@@ -9,6 +9,7 @@ Yarn
 yarn install
 ```
 
+Npm
 ```bash
 npm install
 ```
