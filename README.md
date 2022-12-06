@@ -16,7 +16,7 @@ npm install
 
 ## Config
 
-Set your ACCESS_TOKEN of ifood in const `TOKEN`
+Set your ACCESS_TOKEN of ifood in venv `TOKEN` in `.env`
 
 ## Use
 
