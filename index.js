@@ -1,6 +1,6 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
-import { map, pipe, filter, pluck, sum, groupBy, prop, values, sortWith, descend } from 'ramda'
+import { map, pipe, filter, pluck, sum, groupBy, prop, values, sortWith, descend, has } from 'ramda'
 
 dotenv.config()
 
@@ -43,22 +43,35 @@ const getMerchantMoreDemanded = pipe(
     ])
 )
 
+const errors = {
+    ERR_BAD_REQUEST: "Seu token expirou, coloque um novo token no seu .env"
+}
+
+const formatDate = (date) => {
+    const dateSplitted = date.split('T')[0].split('-')
+    return `${dateSplitted[2]}/${dateSplitted[1]}/${dateSplitted[0]}`
+}
+
 const get = async () => {
-    let orders = []
-    for (let i=1;i<20;i++) {
-        const response = await instance.get(`https://marketplace.ifood.com.br/v4/customers/me/orders?page=${i}&size=25`)
-        if (response.data.length === 0) {
-            i = 20
-        }    
-
-        orders = [...orders, ...response.data]
+    try {
+        let orders = []
+        for (let i=0;i<999;i++) {
+            const response = await instance.get(`https://marketplace.ifood.com.br/v4/customers/me/orders?page=${i}&size=25`)
+            if (response.data.length === 0) {
+                i = 999
+            }    
+    
+            orders = [...orders, ...response.data]
+        }
+        const moreDemandedMerchants = getMerchantMoreDemanded(orders)
+    
+        console.log(`Último pedido feito em: ${formatDate(orders[0].createdAt)} (${Math.floor(Math.abs(new Date(orders[0].createdAt.split('T')[0]) - new Date()) / (1000 * 60 * 60 * 24))} dias)`)
+        console.log(`Restaurante mais pedido: ${moreDemandedMerchants[0].merchant.name} (${moreDemandedMerchants[0].qtd})`)
+        console.log(`Total de pedidos concluidos: ${getConcluded(orders).length}`)
+        console.log(`Valor total gasto: ${pipeSum(orders)}`)    
+    } catch (err) {
+        console.log(has(err.code)(errors) ? errors[err.code] : `Undefined error: ${err.message}`)
     }
-
-    const moreDemandedMerchants = getMerchantMoreDemanded(orders)
-
-    console.log(`Restaurante mais pedido: ${moreDemandedMerchants[0].merchant.name} (${moreDemandedMerchants[0].qtd})`)
-    console.log(`Total de pedidos concluidos: ${getConcluded(orders).length}`)
-    console.log(`Valor total gasto: ${pipeSum(orders)}`)
 }
 
 get()
