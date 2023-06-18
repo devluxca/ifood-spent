@@ -25,3 +25,10 @@ After set your access_token, just run:
 ```bash
 node index.js
 ```
+
+ou
+
+filtre por um mês/ano
+```bash
+node index.js 06/2023
+```
