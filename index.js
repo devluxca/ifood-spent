@@ -16,9 +16,19 @@ const instance = axios.create({
 
 const formatIntToFloat = (value) => parseFloat(`${value.slice(0, value.length - 2).join('')}.${value.slice(value.length - 2, value.length).join('')}`)
 const getConcluded = filter(o => o.lastStatus === 'CONCLUDED')
+const getByMonthAndYear = (monthAndYear) => filter(o => {
+    if (!monthAndYear) return true
+    const monthAndYearOfBuy = `${new Date(o.updatedAt).getUTCMonth() + 1 < 10 ? `0${new Date(o.updatedAt).getUTCMonth() + 1}` : new Date(o.updatedAt).getUTCMonth() + 1}/${new Date(o.updatedAt).getFullYear()}` 
+    return monthAndYearOfBuy === monthAndYear
+})
+
+const filters = pipe(
+    getConcluded,
+    getByMonthAndYear(process.argv[2]),
+)
 
 const pipeSum = pipe(
-    getConcluded,
+    filters,
     pluck('bag'),
     map(o => o.total.valueWithDiscount),
     sum,
@@ -29,7 +39,7 @@ const pipeSum = pipe(
 )
 
 const getMerchants = pipe(
-    getConcluded,
+    filters,
     pluck('merchant'),
     groupBy(prop('id'))
 )
@@ -67,7 +77,7 @@ const get = async () => {
     
         console.log(`Último pedido feito em: ${formatDate(orders[0].createdAt)} (${Math.floor(Math.abs(new Date(orders[0].createdAt.split('T')[0]) - new Date()) / (1000 * 60 * 60 * 24))} dias)`)
         console.log(`Restaurante mais pedido: ${moreDemandedMerchants[0].merchant.name} (${moreDemandedMerchants[0].qtd})`)
-        console.log(`Total de pedidos concluidos: ${getConcluded(orders).length}`)
+        console.log(`Total de pedidos concluidos: ${filters(orders).length}`)
         console.log(`Valor total gasto: ${pipeSum(orders)}`)    
     } catch (err) {
         console.log(has(err.code)(errors) ? errors[err.code] : `Undefined error: ${err.message}`)
